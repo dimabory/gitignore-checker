@@ -128,19 +128,19 @@ class GitIgnoreFile
     /**
      * Return true if a given $path is ignored by file .gitignore
      *
-     * @param RelativePath $relativepath
+     * @param RelativePath $relativePath
      * @return bool
      */
-    public function isPathIgnored(RelativePath $relativepath) : bool
+    public function isPathIgnored(RelativePath $relativePath) : bool
     {
         /** @var GitIgnoreRule $gitIgnoreRule */
         try {
-            $gitIgnoreRule = $this->getLastGitIgnoreRuleInvolvedInPath($relativepath);
+            $gitIgnoreRule = $this->getLastGitIgnoreRuleInvolvedInPath($relativePath);
         } catch (RuleNotFoundException $e) {
             return false;
         }
 
-        if ($gitIgnoreRule->getRuleDecisionOnPath($relativepath) === true) {
+        if ($gitIgnoreRule->getRuleDecisionOnPath($relativePath) === true) {
             return true;
         }
 

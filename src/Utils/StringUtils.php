@@ -16,9 +16,10 @@ class StringUtils
      * Return $string with the trailing "/" (if not present)
      *
      * @param $input
+     *
      * @return string
      */
-    public static function addTrailingSlashIfMissing(string $input) : string
+    public static function addTrailingSlashIfMissing(string $input): string
     {
         if (self::stringHasTrailingSlash($input)) {
             return $input;
@@ -28,11 +29,12 @@ class StringUtils
     }
 
     /**
-     * @param array $tokens
+     * @param array  $tokens
      * @param string $regex
+     *
      * @return bool
      */
-    private static function atLeastOneTokenMatchesRegex($tokens, $regex) : bool 
+    private static function atLeastOneTokenMatchesRegex($tokens, $regex): bool
     {
         return self::searchFirstTokenMatchesRegex($tokens, $regex) !== null;
     }
@@ -40,30 +42,29 @@ class StringUtils
     /**
      * Build an executable Regex for a given .gitignore rule
      *
-     * @param $regex
+     * @param $rule
+     *
      * @return string
      */
-    public static function buildRegexForRule($rule) :string
+    public static function buildRegexForRule(string $rule): string
     {
         // remove initial and trailing slash
         $ruleFormatted = $rule;
-        $ruleFormatted = str_replace(".", "\.", $ruleFormatted);;
-        $ruleFormatted = str_replace("*", ".*", $ruleFormatted);;
-        $ruleFormatted = StringUtils::removeInitialSlash($ruleFormatted);
-        $ruleFormatted = StringUtils::removeTrailingSlash($ruleFormatted);
+        $ruleFormatted = str_replace(['.', '*'], ["\.", '.*'], $ruleFormatted);
+        $ruleFormatted = static::removeInitialSlash($ruleFormatted);
+        $ruleFormatted = static::removeTrailingSlash($ruleFormatted);
 
-        $regex = sprintf("^%s$", $ruleFormatted);
-
-        return $regex;
+        return sprintf('^%s$', $ruleFormatted);
     }
 
     /**
      * Explode a string using "/" as delimiter
      *
      * @param string $input
+     *
      * @return array
      */
-    public static function explodeStringWithDirectorySeparatorAsDelimiter(string $input) : array
+    public static function explodeStringWithDirectorySeparatorAsDelimiter(string $input): array
     {
         $tokens = explode("/", $input);
         $tokens = array_filter($tokens);
@@ -74,12 +75,13 @@ class StringUtils
     /**
      * @param string $regex
      * @param string $input
+     *
      * @return bool
      */
-    public static function regexIsMatched(string $regex, string $input) : bool
+    public static function regexIsMatched(string $regex, string $input): bool
     {
         // build the executable regex
-        $regex = sprintf('#%s#i', $regex);
+        $regex = sprintf('/%s/i', $regex);
 
         return preg_match($regex, $input) === 1;
     }
@@ -89,9 +91,10 @@ class StringUtils
      *
      * @param string $regex
      * @param string $path
+     *
      * @return bool
      */
-    private static function regexMatchesLastPathToken(string $regex, string $path) : bool
+    private static function regexMatchesLastPathToken(string $regex, string $path): bool
     {
         $pathTokens = StringUtils::explodeStringWithDirectorySeparatorAsDelimiter($path);
 
@@ -110,40 +113,51 @@ class StringUtils
     /**
      * @param string $regex
      * @param string $path
+     *
      * @return bool
      */
-    private static function regexMatchesFirstPathToken(string $regex, string $path) : bool
+    private static function regexMatchesFirstPathToken(string $regex, string $path): bool
     {
-        $pathTokens = StringUtils::explodeStringWithDirectorySeparatorAsDelimiter($path);
+        $pathTokens = static::explodeStringWithDirectorySeparatorAsDelimiter($path);
 
-        return self::searchFirstTokenMatchesRegex($pathTokens, $regex) === 0;
+        return static::searchFirstTokenMatchesRegex($pathTokens, $regex) === 0;
     }
 
     /**
      * Return $string without the initial "/" (if present)
      *
      * @param $input
-     * @return bool|string
+     *
+     * @return string
      */
-    public static function removeInitialSlash(string $input) : string
+    public static function removeInitialSlash(string $input): string
     {
-        if (self::stringHasInitialSlash($input)) {
+        if (static::stringHasInitialSlash($input)) {
             $input = substr($input, 1);
+
+            if (false === $input) {
+                throw new \LogicException("Failing to process $input");
+            }
         }
 
         return $input;
     }
 
     /**
-     * Return $string without the triling "/" (if present)
+     * Return $string without the trailing "/" (if present)
      *
      * @param $input
-     * @return bool|string
+     *
+     * @return string
      */
-    public static function removeTrailingSlash(string $input) : string
+    public static function removeTrailingSlash(string $input): string
     {
-        if (self::stringHasTrailingSlash($input)) {
+        if (static::stringHasTrailingSlash($input)) {
             $input = substr($input, 0, -1);
+
+            if (false === $input) {
+                throw new \LogicException("Failing to process $input");
+            }
         }
 
         return $input;
@@ -154,17 +168,18 @@ class StringUtils
      *
      * @param string $rule
      * @param string $path
+     *
      * @return bool
      */
-    public static function ruleComplexMatchesPath(string $rule, string $path) : bool
+    public static function ruleComplexMatchesPath(string $rule, string $path): bool
     {
-        $ruleTokens = self::explodeStringWithDirectorySeparatorAsDelimiter($rule);
-        $pathTokens = StringUtils::explodeStringWithDirectorySeparatorAsDelimiter($path);
+        $ruleTokens = static::explodeStringWithDirectorySeparatorAsDelimiter($rule);
+        $pathTokens = static::explodeStringWithDirectorySeparatorAsDelimiter($path);
 
         foreach ($ruleTokens as $ruleToken) {
-            $regex = self::buildRegexForRule($ruleToken);
+            $regex = static::buildRegexForRule($ruleToken);
 
-            if (!self::atLeastOneTokenMatchesRegex($pathTokens, $regex)) {
+            if (!static::atLeastOneTokenMatchesRegex($pathTokens, $regex)) {
                 return false;
             }
         }
@@ -175,8 +190,8 @@ class StringUtils
         $lastIndex = null;
 
         foreach ($ruleTokens as $ruleToken) {
-            $regex = self::buildRegexForRule($ruleToken);
-            $index = self::searchFirstTokenMatchesRegex($pathTokens, $regex);
+            $regex = static::buildRegexForRule($ruleToken);
+            $index = static::searchFirstTokenMatchesRegex($pathTokens, $regex);
 
             if ($lastIndex === null) {
                 $lastIndex = $index;
@@ -195,11 +210,17 @@ class StringUtils
         /*
          *
          */
-        if (StringUtils::stringHasInitialSlash($rule) && !self::regexMatchesFirstPathToken( self::buildRegexForRule($ruleTokens[0]), $path)) {
+        if (static::stringHasInitialSlash($rule) && !self::regexMatchesFirstPathToken(
+                self::buildRegexForRule($ruleTokens[0]),
+                $path
+            )) {
             return false;
         }
 
-        if (StringUtils::stringHasTrailingSlash($rule) && !self::regexMatchesLastPathToken(self::buildRegexForRule($ruleTokens[count($ruleTokens)-1]), $path)) {
+        if (static::stringHasTrailingSlash($rule) && !self::regexMatchesLastPathToken(
+                self::buildRegexForRule($ruleTokens[count($ruleTokens) - 1]),
+                $path
+            )) {
             return false;
         }
 
@@ -210,6 +231,7 @@ class StringUtils
      * Return true if $rule contains a logic that implies subfolders
      *
      * @param string $rule
+     *
      * @return bool
      */
     public static function ruleIsOnSubfolders(string $rule)
@@ -222,33 +244,34 @@ class StringUtils
      *
      * @param string $rule
      * @param string $path
+     *
      * @return bool
      * @throws InvalidArgumentException
      */
-    public static function ruleSimpleMatchesPath(string $rule, string $path) : bool
+    public static function ruleSimpleMatchesPath(string $rule, string $path): bool
     {
-        if (self::ruleIsOnSubfolders($rule)) {
+        if (static::ruleIsOnSubfolders($rule)) {
             throw new InvalidArgumentException("Rule \"$rule\" cannot be used here.");
         }
 
         //
-        $regex = self::buildRegexForRule($rule);
-        $pathTokens = StringUtils::explodeStringWithDirectorySeparatorAsDelimiter($path);
+        $regex      = static::buildRegexForRule($rule);
+        $pathTokens = static::explodeStringWithDirectorySeparatorAsDelimiter($path);
 
         /*
          * check that at least one token of $path matches the "simple" rule
          */
-        $atLeastOnetokenIsMatched = self::atLeastOneTokenMatchesRegex($pathTokens, $regex);
+        $atLeastOnetokenIsMatched = static::atLeastOneTokenMatchesRegex($pathTokens, $regex);
 
         if ($atLeastOnetokenIsMatched !== true) {
             return false;
         }
 
-        if (StringUtils::stringHasInitialSlash($rule) && !self::regexMatchesFirstPathToken($regex, $path)) {
+        if (static::stringHasInitialSlash($rule) && !self::regexMatchesFirstPathToken($regex, $path)) {
             return false;
         }
 
-        if (StringUtils::stringHasTrailingSlash($rule) && !self::regexMatchesLastPathToken($regex, $path)) {
+        if (static::stringHasTrailingSlash($rule) && !static::regexMatchesLastPathToken($regex, $path)) {
             return false;
         }
 
@@ -258,14 +281,15 @@ class StringUtils
     /**
      * Return the index of the found token matching $regex
      *
-     * @param array $tokens
+     * @param array  $tokens
      * @param string $regex
+     *
      * @return int|null
      */
     private static function searchFirstTokenMatchesRegex(array $tokens, string $regex)
     {
         foreach ($tokens as $k => $token) {
-            if (self::regexIsMatched($regex, $token)) {
+            if (static::regexIsMatched($regex, $token)) {
                 return $k;
             }
         }
@@ -277,9 +301,10 @@ class StringUtils
      * Return true if $string has an initial "/"
      *
      * @param $input
+     *
      * @return bool
      */
-    public static function stringHasInitialSlash(string $input) : bool
+    public static function stringHasInitialSlash(string $input): bool
     {
         return preg_match("#^\/.*#", $input) === 1; // @todo check for $path containing "#"
     }
@@ -288,9 +313,10 @@ class StringUtils
      * Return true if $string has a trailing "/"
      *
      * @param $input
+     *
      * @return bool
      */
-    public static function stringHasTrailingSlash(string $input) : bool
+    public static function stringHasTrailingSlash(string $input): bool
     {
         return preg_match("#.*\/$#", $input) === 1;   // @todo check for $path containing "#"
     }

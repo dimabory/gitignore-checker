@@ -51,7 +51,9 @@ class RelativePath
      *   - check if file/folder actually exists
      *
      * @param string $path
+     *
      * @return RelativePath
+     *
      * @throws FileNotFoundException
      * @throws InvalidArgumentException
      * @throws LogicException

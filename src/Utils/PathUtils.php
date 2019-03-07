@@ -18,7 +18,8 @@ class PathUtils
      * Return true if $rule matches $relativePath
      *
      * @param string $rule
-     * @param string $relativePath
+     * @param RelativePath $relativePath
+     *
      * @return bool
      */
     public static function ruleMatchesPath($rule, RelativePath $relativePath) : bool
@@ -44,6 +45,7 @@ class PathUtils
      * Array containing all the paths to be scanned, contained in the $repositoryBaseDir (the first one coincides with it)
      *
      * @param RelativePath $relativePath
+     *
      * @return string[]
      */
     public static function getRelativeDirectoriesToScan(RelativePath $relativePath) : array
@@ -54,7 +56,7 @@ class PathUtils
         $tokensCount = \count($tokens);
 
         for ($i = 0; $i < $tokensCount; $i++) {
-            $output[] = "/" . implode('/', array_slice($tokens, 0, $i));
+            $output[] = '/'. implode('/', array_slice($tokens, 0, $i));
         }
 
         return $output;
@@ -64,6 +66,7 @@ class PathUtils
      * Throws exception if $path does not represent a readable and existing folder
      *
      * @param string $path
+     *
      * @throws InvalidArgumentException
      * @throws LogicException
      */
@@ -78,29 +81,26 @@ class PathUtils
      * @param string $path
      * @param bool $checkIsDir
      * @param bool $checkIsFile
+     *
      * @throws InvalidArgumentException
      * @throws LogicException
      */
     public static function checkAbsolutePathIsValid(string $path, $checkIsDir = false, $checkIsFile = false) : void
     {
         if (!StringUtils::stringHasInitialSlash($path)) {
-            throw new LogicException(sprintf("Argument must be an absolute path: \"%s\" given.", $path));
+            throw new LogicException(sprintf('Argument must be an absolute path: "%s" given.', $path));
         }
 
         if (!file_exists($path)) {
-            throw new LogicException(sprintf("Path \"%s\" does not exist.", $path));
+            throw new LogicException(sprintf('Path "%s" does not exist.', $path));
         }
 
-        if ($checkIsDir === true) {
-            if (!is_dir($path)) {
-                throw new LogicException(sprintf("Path \"%s\" exists but it's not a directory.", $path));
-            }
+        if (($checkIsDir === true) && !is_dir($path)) {
+            throw new LogicException(sprintf("Path \"%s\" exists but it's not a directory.", $path));
         }
 
-        if ($checkIsFile === true) {
-            if (!is_file($path)) {
-                throw new LogicException(sprintf("Path \"%s\" exists but it's not a file.", $path));
-            }
+        if (($checkIsFile === true) && !is_file($path)) {
+            throw new LogicException(sprintf("Path \"%s\" exists but it's not a file.", $path));
         }
 
         if (!is_readable($path)) {
@@ -108,7 +108,7 @@ class PathUtils
         }
 
         if (realpath($path) === false) {
-            throw new LogicException(sprintf("Path \"%s\" does not exist.", $path));
+            throw new LogicException(sprintf('Path "%s" does not exist.', $path));
         }
     }
 
@@ -116,10 +116,11 @@ class PathUtils
      * Replaces "//" with "/"
      *
      * @param string $input
+     *
      * @return string
      */
     public static function removeDoubleSlashes(string $input) : string
     {
-        return preg_replace("#\/\/#", "/", $input);  //@todo handle "#" in $input
+        return preg_replace("#\/\/#", '/', $input);  //@todo handle "#" in $input
     }
 }
